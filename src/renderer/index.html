@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Vibehours</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body data-busy="1">
+    <div class="shell">
+      <nav id="nav" class="nav" aria-label="Pages" hidden>
+        <div class="brand">Vibehours</div>
+        <div class="nav-pages">
+          <button type="button" class="nav-item" id="nav-overview">Overview</button>
+          <button type="button" class="nav-item" id="nav-time">Time</button>
+          <button type="button" class="nav-item" id="nav-tokens">Tokens</button>
+          <button type="button" class="nav-item" id="nav-agent">Agent</button>
+          <button type="button" class="nav-item" id="nav-prompts">Prompts</button>
+          <button type="button" class="nav-item" id="nav-projects">Projects</button>
+        </div>
+        <div class="nav-end">
+          <button type="button" class="nav-item" id="open-settings">Settings</button>
+          <button type="button" id="refresh">Refresh</button>
+        </div>
+      </nav>
+
+      <div class="content">
+        <main id="view-main" hidden>
+          <div class="title-row">
+            <h1 id="page-title"></h1>
+            <span id="label-name" class="chip" hidden></span>
+          </div>
+          <p id="label-why" class="label-why" hidden></p>
+          <p id="period" class="period" aria-live="polite"></p>
+          <p id="quiet" class="quiet" aria-live="polite"></p>
+          <div id="message" class="message" hidden></div>
+
+          <div id="pages">
+            <div id="page-overview" class="page" hidden>
+              <div id="last-week" class="last-week" hidden>
+                <p id="last-week-text"></p>
+                <button type="button" id="last-week-close">Close</button>
+              </div>
+
+              <section id="week" hidden>
+                <h2 id="week-title"></h2>
+                <dl id="week-tiles" class="tiles three"></dl>
+                <p id="week-note" class="note"></p>
+              </section>
+
+              <section id="insights" hidden>
+                <h2>What stands out</h2>
+                <ul id="insight-lines" class="card lines"></ul>
+                <p class="note">
+                  Each line is a rule with a margin: it is here only while its numbers clear it.
+                  Hours are prompting hours unless a line says otherwise.
+                </p>
+              </section>
+
+              <section id="share" hidden>
+                <h2>Share</h2>
+                <div class="share-row">
+                  <button type="button" id="share-open">Make a share picture</button>
+                  <span class="share-month">
+                    <select id="month-pick" aria-label="Month for the monthly card"></select>
+                    <button type="button" id="month-open">Make a monthly card</button>
+                  </span>
+                </div>
+                <p class="note">
+                  A picture of your numbers to save or copy. Names are never on it, whatever Hide
+                  names is set to: no project, no source, no path, none of your words. You see it
+                  before anything is saved.
+                </p>
+              </section>
+
+              <section id="usage" hidden>
+                <h2 id="usage-title"></h2>
+                <dl id="usage-tiles" class="tiles six"></dl>
+                <p id="usage-note" class="note"></p>
+              </section>
+
+              <section id="stats" hidden>
+                <h2>All history, prompting hours</h2>
+                <dl id="headline" class="tiles six"></dl>
+                <h2>Streaks</h2>
+                <dl id="streaks" class="tiles three"></dl>
+                <p id="totals" class="note"></p>
+              </section>
+
+              <section id="records" hidden>
+                <h2>Records</h2>
+                <dl id="record-tiles" class="tiles four"></dl>
+                <p id="records-note" class="note"></p>
+              </section>
+            </div>
+            <div id="page-time" class="page" hidden></div>
+            <div id="page-tokens" class="page" hidden></div>
+            <div id="page-agent" class="page" hidden></div>
+            <div id="page-prompts" class="page" hidden></div>
+            <div id="page-projects" class="page" hidden></div>
+          </div>
+
+          <footer>
+            <p class="note">
+              Prompting hours count the time you spent typing prompts: prompts less than 30
+              minutes apart are one block, a block runs 10 minutes past its last prompt, and a day
+              ends at 4am. A big day is 4 hours or more. A week starts on Sunday.
+            </p>
+            <p class="note">Your history is read on this PC and goes nowhere else.</p>
+          </footer>
+        </main>
+
+        <main id="view-setup" hidden>
+          <h2 id="setup-title" class="title"></h2>
+          <p id="setup-lead" class="lead"></p>
+
+          <ul id="choices" class="choices"></ul>
+          <div id="nothing" class="message plain" hidden></div>
+          <p id="remote-note" class="note" hidden></p>
+          <p id="wsl-note" class="note" hidden>
+            Claude Code inside Linux on this PC (WSL) is not read by this version.
+          </p>
+          <div id="keep-year" class="card" hidden></div>
+
+          <h3>Home time zone</h3>
+          <p class="zone">
+            <select id="zone" aria-label="Home time zone"></select>
+          </p>
+          <p id="zone-note" class="note"></p>
+
+          <div id="more-settings">
+            <h3>Plan price</h3>
+            <p class="zone">
+              <input
+                id="plan-price"
+                type="text"
+                maxlength="24"
+                autocomplete="off"
+                spellcheck="false"
+                aria-label="What your plan costs a month"
+                aria-describedby="plan-note"
+              />
+            </p>
+            <p id="plan-note" class="note"></p>
+
+            <h3>Names</h3>
+            <p class="zone">
+              <label class="switch"><input id="hide-names" type="checkbox" /> Hide names</label>
+            </p>
+            <p class="note">
+              For screenshots. Every project reads Project 1, Project 2 and so on in order of
+              hours, every source reads Source 1, and the Prompts page shows its counts but not
+              your words.
+            </p>
+          </div>
+
+          <div class="actions">
+            <button id="setup-done" type="button" class="primary"></button>
+            <button id="look-again" type="button">Look again</button>
+          </div>
+          <p class="note">
+            Your history is read on this PC and goes nowhere else. Vibehours only reads from other
+            machines and never changes anything on them.
+          </p>
+        </main>
+      </div>
+    </div>
+
+    <div id="tip" class="tip" role="status" hidden></div>
+
+    <dialog id="card-dialog" aria-labelledby="card-title">
+      <h2 id="card-title" class="title"></h2>
+      <canvas id="card-canvas" width="1200" height="630"></canvas>
+      <p class="note">1200 by 630. This is the whole picture: nothing else is saved or copied.</p>
+      <div class="actions">
+        <button type="button" id="card-save" class="primary">Save as PNG</button>
+        <button type="button" id="card-copy">Copy to clipboard</button>
+        <button type="button" id="card-close">Close</button>
+      </div>
+      <p id="card-status" class="note" aria-live="polite"></p>
+    </dialog>
+
+    <script src="words.js"></script>
+    <script src="charts.js"></script>
+    <script src="card.js"></script>
+    <script src="pages.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>

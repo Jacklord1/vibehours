@@ -1,0 +1,15 @@
+node_modules/
+dist/
+release/
+
+# Real data never goes in this repo. Tests use made-up fixtures written
+# inline in the test files.
+*.jsonl
+history*
+*.png
+.env*
+
+# The pictures that belong here: the app icon, and the README's, which are
+# taken on a made-up home.
+!build/icon.png
+!docs/*.png

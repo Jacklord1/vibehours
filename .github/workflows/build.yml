@@ -1,0 +1,138 @@
+name: Build
+
+# Builds the unsigned Windows installer and the Linux downloads. A tag like
+# v1.0.0 also attaches them to a release.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      # The same check as on Linux, by Windows' own audit of connections.
+      - name: Check the app opens no connection
+        timeout-minutes: 10
+        shell: bash
+        run: bash scripts/quiet.sh "$RUNNER_TEMP"
+
+      - name: Build the installer
+        run: npx electron-builder --win --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vibehours-windows-installer
+          path: release/*.exe
+          if-no-files-found: error
+
+      # Pictures of the real app on Windows, on a made-up home, so a build
+      # is seen with Windows fonts, paths and regional format before anyone
+      # installs it. Never allowed to block the installer.
+      - name: Take pictures on a made-up home
+        continue-on-error: true
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          export USERPROFILE="$RUNNER_TEMP/home"
+          bash scripts/pictures.sh "$RUNNER_TEMP" shots
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: vibehours-windows-pictures
+          path: shots/*.png
+          if-no-files-found: warn
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm test
+
+      # The README says what the running app was seen to do on the network.
+      # This runs the real app under strace and fails the build if it opens
+      # an internet socket.
+      - name: Check the app opens no connection
+        run: |
+          sudo apt-get install -y strace
+          bash scripts/quiet.sh "$RUNNER_TEMP" --no-sandbox --ozone-platform=headless
+
+      - name: Build the AppImage and the .deb
+        run: npx electron-builder --linux --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vibehours-linux-downloads
+          path: |
+            release/*.AppImage
+            release/*.deb
+          if-no-files-found: error
+
+      # The same pictures as on Windows, with this runner's fonts and paths.
+      # There is no display here, so the window is drawn off screen.
+      - name: Take pictures on a made-up home
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          export HOME="$RUNNER_TEMP/home"
+          export LANG=en_AU.UTF-8
+          bash scripts/pictures.sh "$RUNNER_TEMP" shots --no-sandbox --ozone-platform=headless
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: vibehours-linux-pictures
+          path: shots/*.png
+          if-no-files-found: warn
+
+  # One release holding every download, made only when both builds are in.
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: vibehours-windows-installer
+          path: downloads
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: vibehours-linux-downloads
+          path: downloads
+
+      - name: Attach to a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" downloads/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Vibehours $GITHUB_REF_NAME" \
+            --notes "Unsigned. Windows will warn that the publisher is unknown: choose More info, then Run anyway. On Ubuntu and Debian, install the .deb. The AppImage is for other Linux systems; on Ubuntu 24.04 it needs libfuse2t64. No person has yet seen the Linux app's window: the Linux downloads were started with no screen attached and pictured off screen only. What has and has not been seen working is in the README."

@@ -1,0 +1,58 @@
+{
+  "name": "vibehours",
+  "version": "1.0.0",
+  "description": "See how much you vibe code. Reads the history Claude Code already keeps.",
+  "homepage": "https://github.com/Jacklord1/vibehours",
+  "license": "MIT",
+  "author": "Vibehours contributors",
+  "private": true,
+  "main": "dist/src/main/main.js",
+  "scripts": {
+    "build": "tsc -p . && node scripts/copy-static.js",
+    "test": "npm run build && node --test \"dist/test/*.test.js\"",
+    "start": "npm run build && electron .",
+    "hours": "npm run build && node dist/scripts/hours.js",
+    "usage": "npm run build && node dist/scripts/usage.js",
+    "dist:win": "npm run build && electron-builder --win --publish never",
+    "dist:linux": "npm run build && electron-builder --linux --publish never"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
+    "typescript": "^7.0.2"
+  },
+  "build": {
+    "appId": "app.vibehours.desktop",
+    "productName": "Vibehours",
+    "files": [
+      "dist/src/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "artifactName": "Vibehours-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "build/icon.png",
+      "category": "Utility",
+      "executableName": "vibehours",
+      "synopsis": "See how much you vibe code",
+      "maintainer": "Vibehours contributors <4343032+Jacklord1@users.noreply.github.com>",
+      "artifactName": "Vibehours-${version}-${arch}.${ext}"
+    }
+  }
+}

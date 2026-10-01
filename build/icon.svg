@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Vibehours: a week of days, the big ones lit. Drawn for this app. -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="#1f1e1c"/>
+  <g stroke-linecap="round" stroke-width="34" fill="none">
+    <path d="M112 376 V300" stroke="#8d8a82"/>
+    <path d="M160 376 V214" stroke="#e8a94c"/>
+    <path d="M208 376 V262" stroke="#f3efe6"/>
+    <path d="M256 376 V140" stroke="#e8a94c"/>
+    <path d="M304 376 V236" stroke="#f3efe6"/>
+    <path d="M352 376 V182" stroke="#e8a94c"/>
+    <path d="M400 376 V324" stroke="#8d8a82"/>
+  </g>
+</svg>
